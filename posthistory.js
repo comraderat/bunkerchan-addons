@@ -12,6 +12,11 @@ exports.init = function() {
 };
 
 var respond = function(value, res){ //DEBUG
+    res.setHeader('Content-Type', 'text/html');
+	res.end(value, null, 3)
+}
+
+var respondJson = function(value, res){ //DEBUG
     res.setHeader('Content-Type', 'application/json');
 	res.end(JSON.stringify(value), null, 3)
 }
@@ -104,9 +109,69 @@ var getByIp = function(ip, board){
 	});
 }
 
+var SortByDate = function(values){
+	values.sort((a,b) => new Date(a.creation) < new Date(b.creation) ? 1 : -1);
+	return values;
+}
+
+var MakeLink = function(boardname, threadId, postId){
+	return `/${boardname}/res/${threadId}.html#${postId}`;
+}
+
+var PostIdOrThreadId = function(item){
+	if (typeof item.postId !== 'undefined') {
+		return item.postId;
+	}
+	return item.threadId;
+}
+
+var InnerOrOuterCache = function(item){
+	if (typeof item.innerCache !== 'undefined') {
+		return item.innerCache;
+	}
+	return item.outerCache;
+}
+
+var ToPage = function(values){
+	var csslinks = `<link
+  href="/.static/css/global.css"
+  type="text/css"
+  rel="stylesheet" />
+<link
+  href="/.static/css/posting.css"
+  type="text/css"
+  rel="stylesheet" />
+<link
+  href="/.static/css/thread.css"
+  type="text/css"
+  rel="stylesheet" />
+<link
+  href="/.static/css/threadPage.css"
+  type="text/css"
+  rel="stylesheet" />
+<link
+  href="/.static/css/boardContent.css"
+  type="text/css"
+  rel="stylesheet" />
+<link
+  href="/.static/css/settingsMenu.css"
+  type="text/css"
+  rel="stylesheet" />
+<link
+  href="/.static/css/sideCatalog.css"
+  type="text/css"
+  rel="stylesheet" />`
+	return csslinks + values.map(x => 
+	'<div style="border: red;border-width: 10px;border: solid red; display: block;overflow: auto;margin-top: 5px;margin-left: 5px;margin-right: 5px;">' 
+	+ `<a href="${MakeLink(x.boardUri, x.threadId, PostIdOrThreadId(x))}">Jump to post</a><br>`
+	+ InnerOrOuterCache(x) + "</div>").join("");
+}
+
 var getById = function(postid, board, res){
 	getIp(postid, board)
 	.then((ip) => getByIp(ip, board))
+	.then(SortByDate)
+	.then(ToPage)
 	.then((ok) => respond(ok, res), function(error) {
 		throw(error);
 	}
