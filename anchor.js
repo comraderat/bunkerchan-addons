@@ -1,6 +1,8 @@
 'use strict';
 console.log("Loading anchor addon");
 var editOps = require('../engine/modOps/editOps');
+var postOps = require('../engine/postingOps').common;
+var miscOps = require('../engine/miscOps');
 var staticManipulator = require('../engine/domManipulator/static');
 var templatehandler = require('../engine/templateHandler');
 var db = require('../db');
@@ -36,14 +38,7 @@ exports.init = function() {
 		  cyclic : parameters.cyclic,
 		  autoSage : parameters.autoSage && !parameters.cyclic //changed this from //thread.autoSage && !parameters.cyclic
 		},
-		$unset : {
-		  innerCache : 1,
-		  outerCache : 1,
-		  previewCache : 1,
-		  clearCache : 1,
-		  alternativeCaches : 1,
-		  hashedCache : 1
-		}
+		$unset : miscOps.individualCaches
 	  }, function updatedThread(error) {
 
 		if (!error) {
