@@ -82,7 +82,6 @@ exports.init = function() {
   
   staticManipulator.setModdingInformation = function(document, threadData){
 	  if (threadData.autoSage) {
-		 console.log(document)
 		document = document.replace('__checkboxAutoSage_checked__', 'true');
 	  } else {
 		document = document.replace('checked="__checkboxAutoSage_checked__"', '');
